@@ -1,0 +1,12 @@
+PyQt5
+beautifulsoup4
+requests
+js2xml
+selenium
+xlwt
+pyqtspinner
+urllib3
+charset_normalizer
+idna
+certifi
+soupsieve
