@@ -23,6 +23,7 @@ class ActionManagement:
 	price_diff = 35
 	cur_page = 0
 	temp_arr = []
+	end_flag = 0
 	document_folder = Path.home() / "Documents"
 	amazon_folder = document_folder / "Amazon"
 	
@@ -164,7 +165,6 @@ class ActionManagement:
 
 	# get Jan code by asin code
 	def get_jan_code_by_asin(self, temp_asin_arr, asins):
-		print(asins)
 		url = "https://sellingpartnerapi-fe.amazon.com/catalog/2022-04-01/items"
 		headers = {
             "x-amz-access-token": self.access_token,
@@ -189,9 +189,14 @@ class ActionManagement:
 				
 				for i in range(len(json_response['items'])):
 					product = json_response['items'][i]
-					price = product['attributes']['list_price'][0]['value'] if 'list_price' in product['attributes'] else '0'
-					if(price == '0'):
+					price = 0
+					site_price = product['attributes']['list_price'][0]['value'] if 'list_price' in product['attributes'] else '0'
+					if(site_price == '0'):
 						price = price_arr[i]
+					elif int(price_arr[i]) != 0:
+						price = site_price if int(site_price) < int(price_arr[i]) else price_arr[i]
+					else:
+						price = site_price
 					
 					temp = [
 						product['identifiers'][0]['identifiers'][0]['identifier'] if len(product['identifiers'][0]['identifiers']) > 0 else '',
@@ -396,7 +401,6 @@ class ActionManagement:
 				stock = '在庫なし' if stock_element else ''
 				
 				price_status = ''
-				print(self.price_diff)
 				if other_price > price:
 					percent = price / (other_price / 100)
 					
@@ -421,8 +425,8 @@ class ActionManagement:
 						
 						self.draw_table(self.products_list)
 		
-		except sqlite3.Error as e:
-			print(f"SQLite error: {e}")
+		# except sqlite3.Error as e:
+		# 	print(f"SQLite error: {e}")
 		except requests.RequestException as e:
 			print(f"Request error: {e}")
 		# finally:
@@ -439,9 +443,7 @@ class ActionManagement:
 		else:
 			page = '&page=' + str(self.cur_page)
 
-		print(page)
-		print(cur_posotion)
-		url = f'https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958&s=salesrank{page}&page=2&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1696132034&softwareClass=Web+Browser&ref=sr_pg_2'
+		url = f'https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958&s=salesrank{page}&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1696132034&softwareClass=Web+Browser&ref=sr_pg_2'
 		if(cur_posotion >= 150000):
 			url = f'https://www.amazon.co.jp/s?rh=n%3A561956&s=salesrank{page}&language=en&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&softwareClass=Web+Browser&ref=nav_em__mu_0_2_5_6'
 
@@ -466,14 +468,11 @@ class ActionManagement:
 				asin = product_element.get_attribute('data-asin')
 				asin_arr.append(asin)
 
-			print(asin_arr)
 			if(len(asin_arr) > 0):
 				asin_arr = self.array_append_and_depend(asin_arr)
 			else:
 				asin_arr = self.array_append_and_depend([])
 
-			print(asin_arr)
-			print(self.temp_arr)
 			asins = self.convert_array_to_string(asin_arr)
 			self.access_token = self.get_access_token()
 			return self.get_jan_code_by_asin(asin_arr, asins)
