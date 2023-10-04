@@ -283,28 +283,29 @@ class Ui_MainWindow(object):
 			sheet.write(0, 5, '価格差', style = style)
 
 			row_count = 0
-			# for r in range(model.rowCount()):
-			# 	sheet.write((row_count + 1), 0, model.data(model.index(row_count, 0)), style = style)
-			# 	sheet.write((row_count + 1), 1, model.data(model.index(row_count, 1)), style = style)
-			# 	sheet.write((row_count + 1), 2, model.data(model.index(row_count, 2)), style = style)
-			# 	sheet.write((row_count + 1), 3, model.data(model.index(row_count, 3)), style = style)
-			# 	sheet.write((row_count + 1), 4, model.data(model.index(row_count, 4)), style = style)
-			# 	sheet.write((row_count + 1), 5, model.data(model.index(row_count, 5)), style = style)
-			# 	row_count += 1
-			conn = sqlite3.connect('database.db')
-			cur = conn.cursor()
-			cur.execute("SELECT * FROM history")
-			rows = cur.fetchall()
-			conn.close()
-
-			for row in rows:
-				sheet.write((row_count + 1), 0, row[0], style = style)
-				sheet.write((row_count + 1), 1, row[1], style = style)
-				sheet.write((row_count + 1), 2, row[2], style = style)
-				sheet.write((row_count + 1), 3, row[3], style = style)
-				sheet.write((row_count + 1), 4, row[4], style = style)
-				sheet.write((row_count + 1), 5, row[5], style = style)
+			for r in range(model.rowCount()):
+				sheet.write((row_count + 1), 0, model.data(model.index(row_count, 0)), style = style)
+				sheet.write((row_count + 1), 1, model.data(model.index(row_count, 1)), style = style)
+				sheet.write((row_count + 1), 2, model.data(model.index(row_count, 2)), style = style)
+				sheet.write((row_count + 1), 3, model.data(model.index(row_count, 3)), style = style)
+				sheet.write((row_count + 1), 4, model.data(model.index(row_count, 4)), style = style)
+				sheet.write((row_count + 1), 5, model.data(model.index(row_count, 5)), style = style)
 				row_count += 1
+			
+			# conn = sqlite3.connect('database.db')
+			# cur = conn.cursor()
+			# cur.execute("SELECT * FROM history")
+			# rows = cur.fetchall()
+			# conn.close()
+
+			# for row in rows:
+			# 	sheet.write((row_count + 1), 0, row[0], style = style)
+			# 	sheet.write((row_count + 1), 1, row[1], style = style)
+			# 	sheet.write((row_count + 1), 2, row[2], style = style)
+			# 	sheet.write((row_count + 1), 3, row[3], style = style)
+			# 	sheet.write((row_count + 1), 4, row[4], style = style)
+			# 	sheet.write((row_count + 1), 5, row[5], style = style)
+			# 	row_count += 1
 
 			wbk.save(filename)
 			return
