@@ -335,5 +335,5 @@ class Ui_MainWindow(object):
 
 	def retranslateUi(self, MainWindow):
 		_translate = QtCore.QCoreApplication.translate
-		MainWindow.setWindowTitle(_translate("MainWindow", "Amazon - BookOff"))
+		MainWindow.setWindowTitle(_translate("MainWindow", "Amazon - BookOff ( DVD, CD )"))
 		self.btn_start.setText(_translate("MainWindow", "開始"))
