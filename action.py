@@ -444,8 +444,6 @@ class ActionManagement:
 		url = f'https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958&s=salesrank{page}&page=2&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1696132034&softwareClass=Web+Browser&ref=sr_pg_2'
 		if(cur_posotion >= 150000):
 			url = f'https://www.amazon.co.jp/s?rh=n%3A561956&s=salesrank{page}&language=en&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&softwareClass=Web+Browser&ref=nav_em__mu_0_2_5_6'
-		elif (cur_posotion >= 300000):
-			url = f'https://www.amazon.co.jp/s?i=software&rh=n%3A689132&s=salesrank{page}&language=en&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=689132&pageType=Browse&qid=1695891292&softwareClass=Web+Browser&ref=sr_pg_2'		
 
 		# logging.basicConfig(filename='selenium.log', level=logging.INFO)
 		chrome_options = Options()

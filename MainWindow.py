@@ -16,7 +16,7 @@ class RequestThread(QThread):
 	def __init__(self, handler, price_diff):
 		super().__init__()
 		self.ui_handler = handler
-		self.total_count = 350000
+		self.total_count = 300000
 		self.price_diff = price_diff
 
 	def run(self):
@@ -46,7 +46,7 @@ class RequestThread(QThread):
 			if not self.ui_handler.main_window.isStop:
 				try:
 					cur_position += 1
-					if(cur_position == 150000 or cur_position == 300000):
+					if(cur_position == 150000):
 						self.ui_handler.cur_page = 0
 
 					self.ui_handler.cur_page += 1
@@ -76,7 +76,7 @@ class Ui_MainWindow(object):
 
 	def __init__(self):
 		super().__init__()
-		self.total_count = 350000
+		self.total_count = 300000
 		self.spinner = None
 		self.progressBar = None
 		self.statusLabel = None
