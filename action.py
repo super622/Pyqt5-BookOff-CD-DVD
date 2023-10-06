@@ -180,34 +180,33 @@ class ActionManagement:
 		response = requests.get(url, headers=headers, params=params)
 		# result_arr = [['', '', '', '']] * len(temp_asin_arr) # 1. jan code, 2. category, 3. ranking, 4. price
 		result_arr = []
-		price_arr = []
 		
 		if response.status_code == 200:
 			json_response = response.json()
 			if (len(json_response['items']) > 0):
-				price_arr = self.get_competitivePrice(asins)
-				
 				for i in range(len(json_response['items'])):
-					product = json_response['items'][i]
-					price = 0
-					site_price = product['attributes']['list_price'][0]['value'] if 'list_price' in product['attributes'] else '0'
-					if(site_price == '0'):
-						price = price_arr[i]
-					elif int(price_arr[i]) != 0:
-						price = site_price if int(site_price) < int(price_arr[i]) else price_arr[i]
+					print(temp_asin_arr[i])
+					if(temp_asin_arr[i] != None):
+						time.sleep(0.5)
+						lowest_price = self.get_lowest_price(temp_asin_arr[i])
 					else:
-						price = site_price
+						lowest_price = 0
 					
+					if lowest_price == 0:
+						continue
+					
+					product = json_response['items'][i]
+
 					temp = [
 						product['identifiers'][0]['identifiers'][0]['identifier'] if len(product['identifiers'][0]['identifiers']) > 0 else '',
 						product['salesRanks'][0]['displayGroupRanks'][0]['title'] if len(product['salesRanks'][0]['displayGroupRanks']) > 0 else '',
 						product['salesRanks'][0]['displayGroupRanks'][0]['rank'] if len(product['salesRanks'][0]['displayGroupRanks']) > 0 else '',
-						price
+						lowest_price
 					]
 					result_arr.append(temp)
 				return result_arr
 
-				# price_arr = self.get_competitivePrice(asins)
+				# price_arr = self.get_lowest_price(asins)
 				# if price_arr is None:
 				# 	price_arr = [0] * len(temp_asin_arr)
 				
@@ -246,32 +245,30 @@ class ActionManagement:
 			return ''
 
 	# Get Price of Other sellers
-	def get_competitivePrice(self, asins):
-		url = "https://sellingpartnerapi-fe.amazon.com/products/pricing/v0/competitivePrice"
+	def get_lowest_price(self, asin):
+		url = f"https://sellingpartnerapi-fe.amazon.com/products/pricing/v0/items/{asin}/offers"
 		headers = {
             "x-amz-access-token": self.access_token,
             "Accept": "application/json"
         }
 		params = {
             "MarketplaceId": config.MAKETPLACEID,
-            "Asins": asins,
-            "ItemType": 'Asin'
+            "ItemCondition": 'Used'
         }
 		response = requests.get(url, headers=headers, params=params)
-		result_arr = []
 
 		if response.status_code == 200:
 			json_response = response.json()
-			for product in json_response['payload']:
-				if(len(product['Product']['CompetitivePricing']['CompetitivePrices']) > 0):
-					price = product['Product']['CompetitivePricing']['CompetitivePrices'][0]['Price']['ListingPrice']['Amount']
-					result_arr.append(int(price))
-				else:
-					result_arr.append(0)
-
-			return result_arr
+			if(int(json_response['payload']['Summary']['TotalOfferCount']) == 0):
+				return 0
+			else:
+				lowest_price_arr = json_response['payload']['Summary']['LowestPrices']
+				for lowest_price_element in lowest_price_arr:
+					if(lowest_price_element['condition'] == 'used'):
+						return int(lowest_price_element['LandedPrice']['Amount'])
+				return 0
 		else:
-			return result_arr
+			return 0
 
 	# convert array to str
 	def convert_array_to_string(self, arr):
