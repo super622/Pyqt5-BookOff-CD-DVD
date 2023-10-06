@@ -259,14 +259,12 @@ class ActionManagement:
 
 		if response.status_code == 200:
 			json_response = response.json()
-			if(int(json_response['payload']['Summary']['TotalOfferCount']) == 0):
+			if(len(json_response['payload']['Offers']) == 0):
 				return 0
 			else:
-				lowest_price_arr = json_response['payload']['Summary']['LowestPrices']
-				for lowest_price_element in lowest_price_arr:
-					if(lowest_price_element['condition'] == 'used'):
-						return int(lowest_price_element['LandedPrice']['Amount'])
-				return 0
+				lowest_price_arr = json_response['payload']['Offers']
+				return int(lowest_price_arr[0]['ListingPrice']['Amount'])
+				return (int(lowest_price_arr[0]['ListingPrice']['Amount']) + int(lowest_price_arr[0]['Shipping']['Amount']))
 		else:
 			return 0
 
@@ -459,7 +457,7 @@ class ActionManagement:
 
 		try:
 			driver.get(url)
-			time.sleep(3)
+			time.sleep(5)
 			product_elements = driver.find_elements(By.CLASS_NAME, 's-asin')
 			for product_element in product_elements:
 				asin = product_element.get_attribute('data-asin')
