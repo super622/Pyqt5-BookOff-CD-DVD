@@ -1,4 +1,8 @@
+import datetime
+import pathlib
 import re
+import time
+import pytz
 import xlwt
 import sqlite3
 
@@ -42,46 +46,64 @@ class RequestThread(QThread):
 			# 	self.request_completed.emit('stop')
 
 		cur_position = 0
+		time_counter = 0
+
 		while cur_position < self.total_count:
+			start_time = time.time()
 			if not self.ui_handler.main_window.isStop:
 				try:
 					cur_position += 1
-					if(cur_position == 150000):
-						self.ui_handler.cur_page = 0
+					# if(cur_position == 150000):
+					# 	self.ui_handler.cur_page = 0
 
 					self.ui_handler.cur_page += 1
 					# product_list = self.ui_handler.get_product_info_by_product_list(cur_position)
 					product_list = self.ui_handler.get_products_list(cur_position)
 
+					if product_list == None:
+						time.sleep(10)
+						continue
+
 					if(len(product_list) == 0 and int(self.ui_handler.temp_arr) == 0):
-						cur_position = 150000
+						# cur_position = 150000
 						self.ui_handler.cur_page = 0
 						self.ui_handler.end_flag += 1
 					
 					if self.ui_handler.end_flag == 2:
+						self.request_completed.emit("complete")
 						break
 				
 					if self.ui_handler.main_window.isStop:
+						self.request_completed.emit("complete")
 						break
 
 					# key_arr = [['4580128895130', '', '', '10000'], ['4580128895383', '', '', '10000'], ['4988067000125', '', '', '10000']]
 					for product in product_list:
 						if self.ui_handler.main_window.isStop:
+							self.request_completed.emit("complete")
 							break
+
 						cur_position += 1
 						
 						if(product[0] != ''):
 							self.ui_handler.get_product_url(product, cur_position)
 
-						progress = 100 / self.total_count * cur_position
+						# progress = 100 / self.total_count * cur_position
+						progress = 100 / 18400 * cur_position
 						self.request_completed.emit(str(progress))
 				except Exception as e:
 					self.request_completed.emit(e)
 			else:
-				self.request_completed.emit("stop")
-				self.quit()
 				break
 
+			end_time = time.time()
+
+			time_counter += (start_time - end_time)
+			print(time_counter)
+			if(time_counter <= -3600):
+				time_counter = 0
+				self.request_completed.emit('save')
+			
 		self.request_completed.emit("stop")
 		self.quit()
 
@@ -278,6 +300,47 @@ class Ui_MainWindow(object):
 			self.spinner.stop()
 			self.request_thread.exit()
 
+	def auto_save(self):
+		curYear = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).year
+		curMonth = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).month
+		curDay = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).day
+		curHour = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).hour
+		curMinute = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).minute
+
+		document_folder = pathlib.Path.home() / "Documents"
+
+		filename = f"BookOff_CD_DVD_{curYear}_{curMonth}_{curDay}_{curHour}_{curMinute}.xls"
+		filepath = document_folder / filename
+
+		with open(filepath, "wb") as file:
+			wbk = xlwt.Workbook()
+			sheet = wbk.add_sheet("sheet", cell_overwrite_ok = True)
+			style = xlwt.XFStyle()
+			font = xlwt.Font()
+			font.bold = True
+			style.font = font
+			model = self.tbl_dataview.model()
+
+			sheet.write(0, 0, 'JAN', style = style)
+			sheet.write(0, 1, 'URL', style = style)
+			sheet.write(0, 2, '在庫', style = style)
+			sheet.write(0, 3, 'サイト価格', style = style)
+			sheet.write(0, 4, 'Amazonの価格', style = style)
+			sheet.write(0, 5, '価格差', style = style)
+
+			row_count = 0
+			for r in range(model.rowCount()):
+				sheet.write((row_count + 1), 0, model.data(model.index(row_count, 0)), style = style)
+				sheet.write((row_count + 1), 1, model.data(model.index(row_count, 1)), style = style)
+				sheet.write((row_count + 1), 2, model.data(model.index(row_count, 2)), style = style)
+				sheet.write((row_count + 1), 3, model.data(model.index(row_count, 3)), style = style)
+				sheet.write((row_count + 1), 4, model.data(model.index(row_count, 4)), style = style)
+				sheet.write((row_count + 1), 5, model.data(model.index(row_count, 5)), style = style)
+				row_count += 1
+
+			wbk.save(filepath)
+			return
+
 	def savefile(self):
 		filename, _ = QFileDialog.getSaveFileName(self, 'Save File', '', ".xls(*.xls)")
 		if filename:
@@ -326,6 +389,7 @@ class Ui_MainWindow(object):
 	
 	def handle_request_completed(self, response_text):
 		if response_text == "start":
+			self.statusLabel.setVisible(True)
 			self.statusLabel.setText("ダウンロード中...")
 			self.spinner.start()
 		elif response_text == "stop":
@@ -334,16 +398,26 @@ class Ui_MainWindow(object):
 			self.btn_export.setEnabled(True)
 			self.btn_start.setEnabled(True)
 			self.isStop = True
+		elif response_text == "save":
+			self.auto_save()
+		elif response_text == "complete":
+			self.auto_save()
+			self.statusLabel.setVisible(True)
+			self.statusLabel.setText("完了しました。")
+			self.progressBar.setVisible(False)
 		elif response_text == "reading":
 			self.progressBar.setValue(0)
+			self.statusLabel.setVisible(True)
 			self.statusLabel.setText("ファイルを読んでいます...")
 		elif response_text != "start" and response_text != 'stop' and response_text != 'reading' and re.findall(r'\d+', response_text) == False:
 			self.spinner.stop()
+			self.statusLabel.setVisible(True)
 			self.statusLabel.setText(response_text)
 		else:
 			self.spinner.stop()
 			cur_position = float(response_text) / (100 / self.total_count)
-			self.statusLabel.setText(f"{self.total_count} 個中 {round(cur_position)} 個処理済み")
+			self.statusLabel.setVisible(False)
+			# self.statusLabel.setText(f"{self.total_count} 個中 {round(cur_position)} 個処理済み")
 			self.progressBar.setVisible(True)
 			self.btn_export.setEnabled(True)
 			self.progressBar.setValue(round(float(response_text)))

@@ -240,9 +240,9 @@ class ActionManagement:
 				# 	print(result_arr)
 				# return result_arr
 			else:
-				return ''
+				return None
 		else:
-			return ''
+			return None
 
 	# Get Price of Other sellers
 	def get_lowest_price(self, asin):
@@ -357,6 +357,7 @@ class ActionManagement:
 		else:
 			length = len(self.temp_arr)
 			result = self.temp_arr[0:length]
+			self.temp_arr = []
 			return result
 
 	# get product url
@@ -473,5 +474,6 @@ class ActionManagement:
 			return self.get_jan_code_by_asin(asin_arr, asins)
 		except Exception as e:
 			print(e)
+			return None
 		finally:
 			driver.quit()
