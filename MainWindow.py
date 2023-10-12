@@ -62,9 +62,13 @@ class RequestThread(QThread):
 
 					if product_list == None:
 						time.sleep(10)
+						if(self.ui_handler.end_flag == 0):
+							cur_position += 27
+						else:
+							cur_position += 19
 						continue
 
-					if(len(product_list) == 0 and int(self.ui_handler.temp_arr) == 0):
+					if(len(product_list) == 0 and len(self.ui_handler.temp_arr) == 0):
 						# cur_position = 150000
 						self.ui_handler.cur_page = 0
 						self.ui_handler.end_flag += 1
@@ -72,6 +76,10 @@ class RequestThread(QThread):
 					if self.ui_handler.end_flag == 2:
 						self.request_completed.emit("complete")
 						break
+
+					if len(product_list) == 0:
+						cur_position += 10
+						continue
 				
 					if self.ui_handler.main_window.isStop:
 						self.request_completed.emit("complete")
