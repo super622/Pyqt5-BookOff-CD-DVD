@@ -204,6 +204,7 @@ class ActionManagement:
 						lowest_price
 					]
 					result_arr.append(temp)
+					print(result_arr)
 				return result_arr
 
 				# price_arr = self.get_lowest_price(asins)
@@ -482,6 +483,7 @@ class ActionManagement:
 
 			asins = self.convert_array_to_string(asin_arr)
 			self.access_token = self.get_access_token()
+			print(asin_arr)
 			return self.get_jan_code_by_asin(asin_arr, asins)
 		except Exception as e:
 			print(e)
