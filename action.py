@@ -440,8 +440,8 @@ class ActionManagement:
 			page = '&page=' + str(self.cur_page)
 
 		url = f'https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958&s=salesrank{page}&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1696132034&softwareClass=Web+Browser&ref=sr_pg_2'
-		if(cur_posotion >= 150000):
-			url = f'https://www.amazon.co.jp/s?rh=n%3A561956&s=salesrank{page}&language=en&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&softwareClass=Web+Browser&ref=nav_em__mu_0_2_5_6'
+		if(self.end_flag == 1):
+			url = f'https://www.amazon.co.jp/s?rh=n%3A561956&s=salesrank{page}&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1696132034&softwareClass=Web+Browser&ref=nav_em__mu_0_2_5_6'
 
 		# logging.basicConfig(filename='selenium.log', level=logging.INFO)
 		try:
