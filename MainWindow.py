@@ -290,9 +290,11 @@ class Ui_MainWindow(object):
 		curMinute = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).minute
 
 		document_folder = pathlib.Path.home() / "Documents"
+		parent_folder = document_folder / "BookOff"
+		dvd_folder = parent_folder / "CD-DVD"
 
 		filename = f"BookOff_CD_DVD_{curYear}_{curMonth}_{curDay}_{curHour}_{curMinute}.xls"
-		filepath = document_folder / filename
+		filepath = dvd_folder / filename
 
 		with open(filepath, "wb") as file:
 			wbk = xlwt.Workbook()

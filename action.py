@@ -24,7 +24,7 @@ class ActionManagement:
 	end_flag = 0
 	document_folder = Path.home() / "Documents"
 	amazon_folder = document_folder / "Amazon"
-	
+
 	def __init__ (self, main_window):
 		self.main_window = main_window
 		self.refresh_token = config.REFRESH_TOKEN
