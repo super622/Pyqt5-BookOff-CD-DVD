@@ -241,8 +241,8 @@ class ActionManagement:
 				return 0
 			else:
 				lowest_price_arr = json_response['payload']['Offers']
-				# return int(lowest_price_arr[0]['ListingPrice']['Amount'])
-				return (int(lowest_price_arr[0]['ListingPrice']['Amount']) + int(lowest_price_arr[0]['Shipping']['Amount']))
+				return int(lowest_price_arr[0]['ListingPrice']['Amount'])
+				# return (int(lowest_price_arr[0]['ListingPrice']['Amount']) + int(lowest_price_arr[0]['Shipping']['Amount']))
 		else:
 			return 0
 
