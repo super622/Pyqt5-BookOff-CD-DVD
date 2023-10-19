@@ -293,6 +293,12 @@ class Ui_MainWindow(object):
 		parent_folder = document_folder / "BookOff"
 		dvd_folder = parent_folder / "CD-DVD"
 
+		if not parent_folder.exists():
+			parent_folder.mkdir(parents=True)
+
+		if not dvd_folder.exists():
+			dvd_folder.mkdir(parents=True)
+
 		filename = f"BookOff_CD_DVD_{curYear}_{curMonth}_{curDay}_{curHour}_{curMinute}.xls"
 		filepath = dvd_folder / filename
 
