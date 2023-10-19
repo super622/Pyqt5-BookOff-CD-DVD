@@ -29,22 +29,6 @@ class RequestThread(QThread):
 		if(self.price_diff != ''):
 			self.ui_handler.price_diff = self.price_diff
 
-			# result = self.ui_handler.product_list_download_from_amazon()
-			# print(type(result) == str)
-			# if(type(result) == str):
-			# 	self.request_completed.emit(result)
-			# 	self.request_completed.emit("stop")
-			
-			# print(result)
-			# total = result['total']
-			# document_id = result['filepath']
-
-			# self.request_completed.emit("reading")
-			# result = self.ui_handler.read_product_list_from_file(document_id)
-			# if(result != 'success'):
-			# 	self.request_completed.emit(result)
-			# 	self.request_completed.emit('stop')
-
 		cur_position = 0
 		time_counter = 0
 
@@ -52,56 +36,44 @@ class RequestThread(QThread):
 			start_time = time.time()
 			if not self.ui_handler.main_window.isStop:
 				try:
-					cur_position += 1
-					# if(cur_position == 150000):
-					# 	self.ui_handler.cur_page = 0
-
 					self.ui_handler.cur_page += 1
 					# product_list = self.ui_handler.get_product_info_by_product_list(cur_position)
 					product_list = self.ui_handler.get_products_list(cur_position)
 
-					if product_list == None:
-						time.sleep(10)
-						if(self.ui_handler.end_flag == 0):
-							cur_position += 27
-						else:
-							cur_position += 19
-						continue
+					print(f"product list => {len(product_list)} === temp list => {len(self.ui_handler.temp_arr)}")
 
 					if(len(product_list) == 0 and len(self.ui_handler.temp_arr) == 0):
-						# cur_position = 150000
-						self.ui_handler.cur_page = 0
-						self.ui_handler.end_flag += 1
-					
-					if self.ui_handler.end_flag == 2:
-						self.request_completed.emit("complete")
-						break
-
-					if len(product_list) == 0:
-						cur_position += 10
-						continue
+						if(self.ui_handler.end_flag < 32):
+							continue
+						else:
+							self.request_completed.emit("complete")
+							cur_position = self.total_count
+							print("end @=== ")
+							break
 				
 					if self.ui_handler.main_window.isStop:
 						self.request_completed.emit("complete")
+						cur_position = self.total_count
+						print('stop !')
 						break
-
-					# key_arr = [['4580128895130', '', '', '10000'], ['4580128895383', '', '', '10000'], ['4988067000125', '', '', '10000']]
+				
 					for product in product_list:
 						if self.ui_handler.main_window.isStop:
 							self.request_completed.emit("complete")
+							cur_position = self.total_count
 							break
-
-						cur_position += 1
 						
 						if(product[0] != ''):
 							self.ui_handler.get_product_url(product, cur_position)
 
-						# progress = 100 / self.total_count * cur_position
-						progress = 100 / 18400 * cur_position
-						self.request_completed.emit(str(progress))
+					cur_position += 10	
+					progress = 100 / self.total_count * cur_position
+					self.request_completed.emit(str(progress))
 				except Exception as e:
 					self.request_completed.emit(e)
+					print(e)
 			else:
+				self.request_completed.emit("complete")
 				break
 
 			end_time = time.time()
@@ -112,6 +84,8 @@ class RequestThread(QThread):
 				time_counter = 0
 				self.request_completed.emit('save')
 			
+		print("end === ")
+		self.request_completed.emit("complete")
 		self.request_completed.emit("stop")
 		self.quit()
 

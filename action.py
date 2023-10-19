@@ -6,14 +6,12 @@ import time
 import requests
 import logging
 
-
 import config
 
 from subprocess import CREATE_NO_WINDOW
 from pathlib import Path
 from PyQt5 import QtWidgets, QtGui
 from bs4 import BeautifulSoup
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -206,44 +204,22 @@ class ActionManagement:
 					result_arr.append(temp)
 					print(result_arr)
 				return result_arr
-
-				# price_arr = self.get_lowest_price(asins)
-				# if price_arr is None:
-				# 	price_arr = [0] * len(temp_asin_arr)
-				
-				# price = 0
-				# for product in json_response['items']:
-				# 	print(f"product => {product['asin']}")
-				# 	for i in range(len(temp_asin_arr)):
-				# 		if len(price_arr) > 0:
-				# 			print(f"before => {price_arr[i]}")
-				# 			if(int(price_arr[i]) != 0):
-				# 				price = price_arr[i]
-				# 			else:
-				# 				print(f"after => {product['attributes']['list_price'][0]['value'] if 'list_price' in product['attributes'] else '0'}")
-				# 				price = product['attributes']['list_price'][0]['value'] if 'list_price' in product['attributes'] else '0'
-				# 		print(f"current => {price}")
-
-				# 		if(temp_asin_arr[i] == product['asin']):
-				# 			print(f"selected => {price} asin = {temp_asin_arr[i]}")
-				# 			print(len(result_arr))
-				# 			print(i)
-				# 			print('selected')
-				# 			result_arr[len(result_arr) - len(result_arr) + i] = [
-				# 				product["identifiers"][0]["identifiers"][0]["identifier"]
-				# 				if product.get("identifiers") else "",
-				# 				product["salesRanks"][0]["displayGroupRanks"][0]["title"]
-				# 				if product.get("salesRanks") else "",
-				# 				product["salesRanks"][0]["displayGroupRanks"][0]["rank"]
-				# 				if product.get("salesRanks") else "",
-				# 				price
-				# 			]
-				# 	print(result_arr)
-				# return result_arr
 			else:
-				return None
+				return []
 		else:
-			return None
+			return []
+
+	def compare_asins(self, cur_asins, before_asins):
+		true_count = 0
+		length = len(before_asins) if len(cur_asins) > len(before_asins) else len(cur_asins)
+		for i in range(length):
+			if(before_asins[i] == cur_asins[i]):
+				true_count += 1
+		
+		if(length == true_count):
+			return True
+		else:
+			return False
 
 	# Get Price of Other sellers
 	def get_lowest_price(self, asin):
@@ -351,14 +327,14 @@ class ActionManagement:
 	def array_append_and_depend(self, asin_array):
 		if len(asin_array) > 0:
 			self.temp_arr = self.temp_arr + asin_array
-		if(len(self.temp_arr) >= 10):
+
+		if(len(self.temp_arr) > 10):
 			result = self.temp_arr[0:10]
-			self.temp_arr = self.temp_arr[10:len(self.temp_arr)]
+			self.temp_arr = self.temp_arr[10:len(self.temp_arr)]	
 			return result
 		else:
-			length = len(self.temp_arr)
-			result = self.temp_arr[0:length]
-			self.temp_arr = []
+			result = self.temp_arr
+			self.temp_arr = []	
 			return result
 
 	# get product url
@@ -440,42 +416,86 @@ class ActionManagement:
 		else:
 			page = '&page=' + str(self.cur_page)
 
-		url = f'https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958&s=salesrank{page}&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1696132034&softwareClass=Web+Browser&ref=sr_pg_2'
-		if(self.end_flag == 1):
-			url = f'https://www.amazon.co.jp/s?rh=n%3A561956&s=salesrank{page}&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1696132034&softwareClass=Web+Browser&ref=nav_em__mu_0_2_5_6'
-
-		# logging.basicConfig(filename='selenium.log', level=logging.INFO)
-		try:
-			chrome_options = Options()
-			chrome_options.add_argument("--headless=new")
-			chrome_options.add_argument("--disable-gpu")
-			chrome_options.add_argument("--no-sandbox")
-			chrome_options.add_argument("--window-size=0,0")
-			chrome_options.creationflags = CREATE_NO_WINDOW
-			chrome_options.experimental_options
-			driver = webdriver.Chrome(options = chrome_options)
-		except:
-			time.sleep(20)
-			chrome_options = Options()
-			chrome_options.add_argument("--headless=new")
-			chrome_options.add_argument("--disable-gpu")
-			chrome_options.add_argument("--no-sandbox")
-			chrome_options.add_argument("--window-size=0,0")
-			chrome_options.creationflags = CREATE_NO_WINDOW
-			chrome_options.experimental_options
-			driver = webdriver.Chrome(options = chrome_options)
+		print(self.cur_page)
+		print(page)
 
 		asin_arr = []
 		asins = ''
 
-		try:
-			driver.get(url)
-			time.sleep(5)
-			product_elements = driver.find_elements(By.CLASS_NAME, 's-asin')
-			for product_element in product_elements:
-				asin = product_element.get_attribute('data-asin')
-				asin_arr.append(asin)
+		url_arr = [
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562016&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AobEG0wnakKU8Akl5dQWGmKZ8FtG60EBYv0xGrcmtc5c&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677372&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_1",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562014&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AopdDpnw3GaUhAy6cwY9Q8mwm%2BTs%2BiLhkpklMfa7I7cM&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_2",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562020&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AeKXhwEKGuthlhr5USPDOJ2tQ6TnXfWugfxTAJVppoGI&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_3",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562026&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3ApjVyUEZm12zJTHO46rMMr7So8l6xUyqkjLMH%2B3rFgTE&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_4",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562018&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AUyVJ%2FPGtY%2BXVE7YlmRUs%2BKZkHpXoPKsAD5fq0tmDf8c&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_5",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A16286781&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AIr1SLYUNZ1%2BcQ8oR452KCRoboxESqmqo0z7D4PaePa0&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_6",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A16286931&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AGaioSFKt18qErOEpl1s7VqEE14sSgocFBbjzRqMCGmk&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_7",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A12842371&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3A3Ny7K6fBVr%2F7%2BB9olXYfVqoG3F1YHNCdxrQ6hqmpmG4&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_8",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A12842321&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AQPFmPFuJ2ZdDCrXE%2B2bWndyQgbHT9ABWt%2FPHBsqT%2BwY&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_9",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562022&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3A9tbO1UD2wWu7eWFPgkz8BL%2B4K2jhGKTZls3Plg6NsOA&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_10",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562024&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AUqDNKWtSa%2BOqGkM1qTL7oetIqMLftxkMqfhHLoHlxCo&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_11",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562030&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AjAmaVYYQF1UW2hXcBGKUldiHw5fH25WlQwasq24Euh8&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_12",
+			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A896246&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AiAzNVJFTCILyLKGaYqwTo31Y8uD3GQ2YJigNtB99sRs&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_13"
 
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569170&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AWv%2FhPQDp4rtHU1lP4YMLr9abLWQUgi0W4S41byiImGw&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678256&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_1",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A575664&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AqhxjUQDLw9z3kvr0WBQcmjC0yoJN3osBWLM%2BZQIQZNw&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678296&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_2",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569290&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3A9UldF9rAtEtW6PwO5yq45FjnJPlH7UtBbHaaCgpto5w&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678296&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_3",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569292&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AeKYKkslrOLlq7LNfNcHF97yNdp7HfhmJB3v4Il46bNw&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678296&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_4",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569298&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3Am0MugJhfb58oszEhQ1y4SAnQgi6BroRYhzm8GfCzxpo&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678296&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_5",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569318&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3A8lRxic5b2TBM0127IYQ0tofwGZmcy%2FdQ2CbOsIJpwmI&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_6",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569322&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3A3f%2FXIYjPR7SHFwVWVRYgI1pQR8JPNDtnelBu6pdi3jU&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_7",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562052&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AUE6%2BgD741JMNQw2vTYBU9dQSWVSdSfESUyWAVYel2VQ&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_8",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A701040&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3Ad8rR49JPya49cNVMuAIrnaeGcjeMDakhGexHGSslUhU&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_9",
+			f"https://www.amazon.co.jp/-/en/s?i=popular&rh=n%3A561956%2Cn%3A562056&s=salesrank%7Bpage%7D{page}&dc&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_10&ds=v1%3A9M3wvVgx%2BAyVw15f%2BnPIQOPURnse4GRwrMlNbzzVEsw",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562058&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AsLfDSFT7Kcx%2FyXLKVQl3B1E3adG9%2Fp%2FMl3xtb4rO%2FAI&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_11",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562064&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3Ax2lluIyTKY5Ds2ihiDQSW8RFM0V2z2VYH%2BH7t1GghEw&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_12",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562060&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AyQZjYrUCjp9A%2BGOoYeVMUa7HwHmqb71SHtQ%2BShajtDQ&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_13",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562062&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3A8Jn581u5EYScfkyRAu4OTCcBQ%2BFmQ32xJS3F6LXCzCo&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_14",
+			f"https://amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569174&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AVUzuDj0mqiu67fL3ResAuwnTSli6liNjDFOomZiVClM&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_15",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569186&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AcGz1ZRap%2F47wrxMNge1Icgr0pHWzGrUYHvmS0kffNas&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_16",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A339877011&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3ARLAKAmxfOFiDB8BcPQjKJT8P7i6CCttHCeJlxyekf58&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_17",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A899296&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AkbC184Lu5%2FWu6n0CzN26Du05vvFFM1JsGdDSPM%2F5RaI&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_18",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562018&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AQLVSwBd3OBX%2FsM919W082mqzZoW9mn6xgPTeJkzRhOQ&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_19"
+		]
+
+		print(url_arr[self.end_flag])
+
+		# logging.basicConfig(filename='selenium.log', level=logging.INFO)
+		try:
+			if(self.cur_page <= 400):
+				# logging.basicConfig(filename='selenium.log', level=logging.INFO)
+				chrome_options = Options()
+				chrome_options.add_argument("--headless=new")
+				chrome_options.add_argument("--disable-gpu")
+				chrome_options.add_argument("--no-sandbox")
+				chrome_options.add_argument("--window-size=0,0")
+				chrome_options.creationflags = CREATE_NO_WINDOW
+				chrome_options.experimental_options
+				driver = webdriver.Chrome(options = chrome_options)
+
+				driver.get(url_arr[self.end_flag])
+				time.sleep(5)
+				
+				product_elements = driver.find_elements(By.CLASS_NAME, 's-asin')
+				for product_element in product_elements:
+					asin = product_element.get_attribute('data-asin')
+					asin_arr.append(asin)
+				driver.quit()
+
+			if(len(self.before_asins) == 0):
+				self.before_asins = asin_arr
+			else:
+				compare_result = self.compare_asins(asin_arr, self.before_asins)
+				print(compare_result)
+
+				if(compare_result == True and len(self.temp_arr) == 0):
+					self.end_flag += 1
+					self.cur_page = 0
+					print("--------------------------------------------------------------------------------")
+					return []
+
+			print(asin_arr)
+			print(f"get asins => {len(asin_arr)}")
 			if(len(asin_arr) > 0):
 				asin_arr = self.array_append_and_depend(asin_arr)
 			else:
@@ -483,10 +503,7 @@ class ActionManagement:
 
 			asins = self.convert_array_to_string(asin_arr)
 			self.access_token = self.get_access_token()
-			print(asin_arr)
 			return self.get_jan_code_by_asin(asin_arr, asins)
 		except Exception as e:
 			print(e)
-			return None
-		finally:
-			driver.quit()
+			return []
