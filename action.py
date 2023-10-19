@@ -21,6 +21,7 @@ class ActionManagement:
 	price_diff = 35
 	cur_page = 0
 	temp_arr = []
+	before_asins = []
 	end_flag = 0
 	document_folder = Path.home() / "Documents"
 	amazon_folder = document_folder / "Amazon"
