@@ -241,8 +241,8 @@ class ActionManagement:
 				return 0
 			else:
 				lowest_price_arr = json_response['payload']['Offers']
-				return int(lowest_price_arr[0]['ListingPrice']['Amount'])
-				# return (int(lowest_price_arr[0]['ListingPrice']['Amount']) + int(lowest_price_arr[0]['Shipping']['Amount']))
+				# return int(lowest_price_arr[0]['ListingPrice']['Amount'])
+				return (int(lowest_price_arr[0]['ListingPrice']['Amount']) + int(lowest_price_arr[0]['Shipping']['Amount']))
 		else:
 			return 0
 
@@ -437,7 +437,6 @@ class ActionManagement:
 			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562024&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AUqDNKWtSa%2BOqGkM1qTL7oetIqMLftxkMqfhHLoHlxCo&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_11",
 			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A562030&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AjAmaVYYQF1UW2hXcBGKUldiHw5fH25WlQwasq24Euh8&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_12",
 			f"https://www.amazon.co.jp/s?i=dvd&rh=n%3A561958%2Cn%3A896246&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AiAzNVJFTCILyLKGaYqwTo31Y8uD3GQ2YJigNtB99sRs&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561958&pageType=Browse&qid=1697677958&rnid=561958&softwareClass=Web+Browser&ref=sr_nr_n_13"
-
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569170&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AWv%2FhPQDp4rtHU1lP4YMLr9abLWQUgi0W4S41byiImGw&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678256&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_1",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A575664&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3AqhxjUQDLw9z3kvr0WBQcmjC0yoJN3osBWLM%2BZQIQZNw&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678296&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_2",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569290&s=salesrank%7Bpage%7D{page}&dc&ds=v1%3A9UldF9rAtEtW6PwO5yq45FjnJPlH7UtBbHaaCgpto5w&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678296&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_3",
