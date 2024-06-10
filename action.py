@@ -179,12 +179,10 @@ class ActionManagement:
 		response = requests.get(url, headers=headers, params=params)
 		# result_arr = [['', '', '', '']] * len(temp_asin_arr) # 1. jan code, 2. category, 3. ranking, 4. price
 		result_arr = []
-		
 		if response.status_code == 200:
 			json_response = response.json()
 			if (len(json_response['items']) > 0):
 				for i in range(len(json_response['items'])):
-					print(temp_asin_arr[i])
 					if(temp_asin_arr[i] != None):
 						time.sleep(0.5)
 						lowest_price = self.get_lowest_price(temp_asin_arr[i])
@@ -353,15 +351,16 @@ class ActionManagement:
 			# 	else:
 			# 		cursor.execute("DELETE FROM history")
 			# 		conn.commit()
-
+			print('product +++++++++++++ ' + product)
 			key_code = product[0]
 			other_price = int(product[3])
 			
 			res = requests.get(f'https://shopping.bookoff.co.jp/search/keyword/{key_code}')
-			
+			print('res =====> ' + res.status_code)
 			if res.status_code == 200:
 				page = BeautifulSoup(res.content, "html.parser")
 				product_url = page.find(class_='productItem__link')
+				print('product url =====> ' + product_url.get('href'))
 				
 				if product_url:
 					product_url = "https://shopping.bookoff.co.jp" + product_url.get('href')
@@ -502,8 +501,10 @@ class ActionManagement:
 				asin_arr = self.array_append_and_depend([])
 
 			asins = self.convert_array_to_string(asin_arr)
+			print(f"get asins => {asins}")
 			self.access_token = self.get_access_token()
 			return self.get_jan_code_by_asin(asin_arr, asins)
 		except Exception as e:
+			print('chrome driver error')
 			print(e)
 			return []

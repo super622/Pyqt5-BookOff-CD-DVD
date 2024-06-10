@@ -4,7 +4,6 @@ import re
 import time
 import pytz
 import xlwt
-import sqlite3
 
 import action
 
@@ -70,7 +69,7 @@ class RequestThread(QThread):
 					progress = 100 / self.total_count * cur_position
 					self.request_completed.emit(str(progress))
 				except Exception as e:
-					self.request_completed.emit(e)
+					# self.request_completed.emit(str(e))
 					print(e)
 			else:
 				self.request_completed.emit("complete")
