@@ -43,7 +43,7 @@ class RequestThread(QThread):
 					print(f"product list => {len(product_list)} === temp list => {len(self.ui_handler.temp_arr)}")
 
 					if(len(product_list) == 0 and len(self.ui_handler.temp_arr) == 0):
-						if(self.ui_handler.end_flag < 32):
+						if(self.ui_handler.end_flag <= 31):
 							continue
 						else:
 							self.request_completed.emit("complete")
