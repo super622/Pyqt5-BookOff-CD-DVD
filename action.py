@@ -1,10 +1,8 @@
 import gzip
 import os
 import re
-import sqlite3
 import time
 import requests
-import logging
 
 import config
 
@@ -38,7 +36,7 @@ class ActionManagement:
 	def draw_table(self, products):
 		table = self.main_window.findChild(QtWidgets.QTableView, "tbl_dataview")
         
-		model = QtGui.QStandardItemModel(len(products), 5)  # Adjust the number of columns accordingly
+		model = QtGui.QStandardItemModel(len(products), 6)  # Adjust the number of columns accordingly
 		model.setHorizontalHeaderLabels(["JAN", "URL", "在庫", "サイト価格", "Amazonの価格", "価格差"])
 
 		for row, product in enumerate(products):
@@ -339,24 +337,10 @@ class ActionManagement:
 	# get product url
 	def get_product_url(self, product, cur_position):
 		try:
-			# conn = sqlite3.connect('database.db')
-			# cursor = conn.cursor()
-
-			# if cur_position == 1:
-			# 	table = cursor.execute("SELECT * FROM sqlite_master WHERE name='history'")
-			# 	rows = table.fetchall()
-			# 	if len(rows) == 0:
-			# 		cursor.execute("CREATE TABLE history (id integer, jan text, url text, stock text, site_price text, amazon_price text, price_status text)")
-			# 		conn.commit()
-			# 	else:
-			# 		cursor.execute("DELETE FROM history")
-			# 		conn.commit()
-			print('product +++++++++++++ ' + product)
 			key_code = product[0]
 			other_price = int(product[3])
 			
 			res = requests.get(f'https://shopping.bookoff.co.jp/search/keyword/{key_code}')
-			print('res =====> ' + res.status_code)
 			if res.status_code == 200:
 				page = BeautifulSoup(res.content, "html.parser")
 				product_url = page.find(class_='productItem__link')
@@ -388,25 +372,11 @@ class ActionManagement:
 							'amazon_price': str(other_price),
 							'price_status': price_status
 						}
+						print(f"res data ==========> {product_data}")
 						self.products_list.append(product_data)
-
-						# # Insert data into the database
-						# cursor.execute("INSERT INTO history (id, jan, url, stock, site_price, amazon_price, price_status) "
-						# 			"VALUES (?, ?, ?, ?, ?, ?, ?)",
-						# 			(cur_position, key_code, product_url, stock, price, other_price, price_status))
-						# conn.commit()
-						
 						self.draw_table(self.products_list)
-		
-		# except sqlite3.Error as e:
-		# 	print(f"SQLite error: {e}")
 		except requests.RequestException as e:
-			print(f"Request error: {e}")
-		# finally:
-		# 	conn.close()
-		# else:
-			# self.products_list.append("Not Scraped !")
-			# self.draw_table(self.products_list)
+			print(e)
 
 	# get product list
 	def get_products_list(self, cur_posotion):
@@ -445,12 +415,12 @@ class ActionManagement:
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569322&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3A3f%2FXIYjPR7SHFwVWVRYgI1pQR8JPNDtnelBu6pdi3jU&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_7",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562052&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AUE6%2BgD741JMNQw2vTYBU9dQSWVSdSfESUyWAVYel2VQ&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_8",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A701040&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3Ad8rR49JPya49cNVMuAIrnaeGcjeMDakhGexHGSslUhU&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_9",
-			f"https://www.amazon.co.jp/-/en/s?i=popular&rh=n%3A561956%2Cn%3A562056&s=salesrank%7Bpage%7D{page}&dc&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_10&ds=v1%3A9M3wvVgx%2BAyVw15f%2BnPIQOPURnse4GRwrMlNbzzVEsw",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562056&s=salesrank%7Bpage%7D{page}&dc&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_10&ds=v1%3A9M3wvVgx%2BAyVw15f%2BnPIQOPURnse4GRwrMlNbzzVEsw",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562058&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AsLfDSFT7Kcx%2FyXLKVQl3B1E3adG9%2Fp%2FMl3xtb4rO%2FAI&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_11",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562064&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3Ax2lluIyTKY5Ds2ihiDQSW8RFM0V2z2VYH%2BH7t1GghEw&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_12",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562060&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AyQZjYrUCjp9A%2BGOoYeVMUa7HwHmqb71SHtQ%2BShajtDQ&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_13",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562062&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3A8Jn581u5EYScfkyRAu4OTCcBQ%2BFmQ32xJS3F6LXCzCo&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_14",
-			f"https://amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569174&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AVUzuDj0mqiu67fL3ResAuwnTSli6liNjDFOomZiVClM&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_15",
+			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569174&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AVUzuDj0mqiu67fL3ResAuwnTSli6liNjDFOomZiVClM&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_15",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A569186&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AcGz1ZRap%2F47wrxMNge1Icgr0pHWzGrUYHvmS0kffNas&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_16",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A339877011&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3ARLAKAmxfOFiDB8BcPQjKJT8P7i6CCttHCeJlxyekf58&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_17",
 			f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A899296&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AkbC184Lu5%2FWu6n0CzN26Du05vvFFM1JsGdDSPM%2F5RaI&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_18",
@@ -459,38 +429,39 @@ class ActionManagement:
 
 		print(url_arr[self.end_flag])
 
-		# logging.basicConfig(filename='selenium.log', level=logging.INFO)
 		try:
 			if(self.cur_page <= 400):
-				# logging.basicConfig(filename='selenium.log', level=logging.INFO)
-				chrome_options = Options()
-				chrome_options.add_argument("--headless=new")
-				chrome_options.add_argument("--disable-gpu")
-				chrome_options.add_argument("--no-sandbox")
-				chrome_options.add_argument("--window-size=0,0")
-				chrome_options.creationflags = CREATE_NO_WINDOW
-				chrome_options.experimental_options
-				driver = webdriver.Chrome(options = chrome_options)
+				# chrome_options = Options()
+				# chrome_options.add_argument("--headless=new")
+				# chrome_options.add_argument("--window-size=0,0")
+				# chrome_options.creationflags = CREATE_NO_WINDOW
+				# chrome_options.experimental_options
+				# driver = webdriver.Chrome(options = chrome_options)
 
-				driver.get(url_arr[self.end_flag])
-				time.sleep(5)
+				# driver.get(url_arr[self.end_flag])
+				# time.sleep(5)
 				
-				product_elements = driver.find_elements(By.CLASS_NAME, 's-asin')
-				for product_element in product_elements:
-					asin = product_element.get_attribute('data-asin')
-					asin_arr.append(asin)
-				driver.quit()
+				# product_elements = driver.find_elements(By.CLASS_NAME, 's-asin')
+				# for product_element in product_elements:
+				# 	asin = product_element.get_attribute('data-asin')
+				# 	asin_arr.append(asin)
+				# driver.quit()
+				response = requests.get(url_arr[self.end_flag])
+				if response.status_code == 200:
+					page = BeautifulSoup(response.content, "html.parser")
+					product_elements = page.find_all(class_='s-asin')
+					for product_element in product_elements:
+						asin = product_element['data-asin']
+						asin_arr.append(asin)
 
 			if(len(self.before_asins) == 0):
 				self.before_asins = asin_arr
 			else:
 				compare_result = self.compare_asins(asin_arr, self.before_asins)
-				print(compare_result)
 
 				if(compare_result == True and len(self.temp_arr) == 0):
 					self.end_flag += 1
 					self.cur_page = 0
-					print("--------------------------------------------------------------------------------")
 					return []
 
 			print(asin_arr)
@@ -501,7 +472,6 @@ class ActionManagement:
 				asin_arr = self.array_append_and_depend([])
 
 			asins = self.convert_array_to_string(asin_arr)
-			print(f"get asins => {asins}")
 			self.access_token = self.get_access_token()
 			return self.get_jan_code_by_asin(asin_arr, asins)
 		except Exception as e:

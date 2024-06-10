@@ -61,15 +61,14 @@ class RequestThread(QThread):
 							self.request_completed.emit("complete")
 							cur_position = self.total_count
 							break
-						
+   
 						if(product[0] != ''):
 							self.ui_handler.get_product_url(product, cur_position)
 
-					cur_position += 10	
+					cur_position += 10
 					progress = 100 / self.total_count * cur_position
 					self.request_completed.emit(str(progress))
 				except Exception as e:
-					# self.request_completed.emit(str(e))
 					print(e)
 			else:
 				self.request_completed.emit("complete")
@@ -77,7 +76,7 @@ class RequestThread(QThread):
 
 			end_time = time.time()
 
-			time_counter += (start_time - end_time)
+			time_counter += (end_time - start_time)
 			print(time_counter)
 			if(time_counter <= -3600):
 				time_counter = 0
@@ -404,11 +403,12 @@ class Ui_MainWindow(object):
 			self.statusLabel.setText(response_text)
 		else:
 			self.spinner.stop()
-			cur_position = float(response_text) / (100 / self.total_count)
+			# cur_position = float(response_text) / (100 / self.total_count)
 			self.statusLabel.setVisible(False)
 			# self.statusLabel.setText(f"{self.total_count} 個中 {round(cur_position)} 個処理済み")
 			self.progressBar.setVisible(True)
 			self.btn_export.setEnabled(True)
+			print(f"progree =====> {response_text}")
 			self.progressBar.setValue(round(float(response_text)))
 
 	def retranslateUi(self, MainWindow):
