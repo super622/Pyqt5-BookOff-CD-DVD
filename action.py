@@ -428,7 +428,7 @@ class ActionManagement:
 				f"https://www.amazon.co.jp/s?i=popular&rh=n%3A561956%2Cn%3A562018&s=salesrank%7Bpage%7D{page}&dc&language=en&ds=v1%3AQLVSwBd3OBX%2FsM919W082mqzZoW9mn6xgPTeJkzRhOQ&applicationType=BROWSER&deviceOS=Windows&handlerName=BrowsePage&pageId=561956&pageType=Browse&qid=1697678410&rnid=561956&softwareClass=Web+Browser&ref=sr_nr_n_19"
 			]
    
-			if(len(url_arr) < self.end_flag):
+			if(len(url_arr) - 1 < self.end_flag):
 				return []
 
 			print(url_arr[self.end_flag])
@@ -441,7 +441,9 @@ class ActionManagement:
 					for product_element in product_elements:
 						asin = product_element['data-asin']
 						asin_arr.append(asin)
-
+			else:
+				return []
+			
 			if(len(self.before_asins) == 0):
 				self.before_asins = asin_arr
 			else:

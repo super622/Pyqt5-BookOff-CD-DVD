@@ -36,14 +36,11 @@ class RequestThread(QThread):
 			if not self.ui_handler.main_window.isStop:
 				try:
 					self.ui_handler.cur_page += 1
-					# product_list = self.ui_handler.get_product_info_by_product_list(cur_position)
 					product_list = self.ui_handler.get_products_list(cur_position)
-					print('====================================')
-					print(self.ui_handler.end_flag)
 					print(f"product list => {len(product_list)} === temp list => {len(self.ui_handler.temp_arr)}")
 
 					if(len(product_list) == 0 and len(self.ui_handler.temp_arr) == 0):
-						if(self.ui_handler.end_flag <= 31):
+						if(self.ui_handler.end_flag < 31):
 							continue
 						else:
 							self.request_completed.emit("complete")
