@@ -3,3 +3,5 @@ requests
 selenium
 pyqtspinner
 pytz
+xlwt
+beautifulsoup4
