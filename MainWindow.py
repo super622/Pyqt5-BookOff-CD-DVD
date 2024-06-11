@@ -19,7 +19,7 @@ class RequestThread(QThread):
 	def __init__(self, handler, price_diff):
 		super().__init__()
 		self.ui_handler = handler
-		self.total_count = 300000
+		self.total_count = 350000
 		self.price_diff = price_diff
 
 	def run(self):
@@ -39,14 +39,16 @@ class RequestThread(QThread):
 					product_list = self.ui_handler.get_products_list(cur_position)
 					print(f"product list => {len(product_list)} === temp list => {len(self.ui_handler.temp_arr)}")
 
-					if(len(product_list) == 0 and len(self.ui_handler.temp_arr) == 0):
-						if(self.ui_handler.end_flag < 31):
-							continue
-						else:
-							self.request_completed.emit("complete")
-							cur_position = self.total_count
-							print("end @=== ")
-							break
+					cur_position += 27
+					print(f"cur position : {cur_position}")
+					progress = 100 / self.total_count * cur_position
+					self.request_completed.emit(str(progress))
+
+					if(self.ui_handler.cur_page > 400 and self.ui_handler.end_flag >= 31):
+						self.request_completed.emit("complete")
+						cur_position = self.total_count
+						print("end @=== ")
+						break
 				
 					if self.ui_handler.main_window.isStop:
 						self.request_completed.emit("complete")
@@ -62,10 +64,6 @@ class RequestThread(QThread):
    
 						if(product[0] != ''):
 							self.ui_handler.get_product_url(product, cur_position)
-
-					cur_position += 27
-					progress = 100 / self.total_count * cur_position
-					self.request_completed.emit(str(progress))
 				except Exception as e:
 					print(e)
 			else:
@@ -75,7 +73,6 @@ class RequestThread(QThread):
 			end_time = time.time()
 
 			time_counter += (start_time - end_time)
-			print(time_counter)
 			if(time_counter <= -3600):
 				time_counter = 0
 				self.request_completed.emit('save')
@@ -257,14 +254,13 @@ class Ui_MainWindow(object):
 	def handle_cell_click(self, index):
 		row = index.row()
 		col = index.column()
-		if col == 1 and self.ui_handler.products_list[row] != "":
+		if col == 1 and len(self.ui_handler.products_list) > row:
 			import webbrowser
 			webbrowser.open(self.ui_handler.products_list[row]['url'])
 
 	def handle_btn_start_clicked(self):
 		if self.isStop:
 			self.btn_start.setText('停止')
-			self.ui_handler.products_list = []
 			price_diff = self.txt_price_diff.text()
 			self.request_thread = RequestThread(self.ui_handler, price_diff)
 			self.request_thread.request_completed.connect(self.handle_request_completed)

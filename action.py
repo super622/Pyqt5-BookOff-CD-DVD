@@ -382,8 +382,7 @@ class ActionManagement:
 			else:
 				page = '&page=' + str(self.cur_page)
 
-			print(self.cur_page)
-			print(page)
+			print(f"page : {self.cur_page} end flag : {self.end_flag}")
 
 			asin_arr = []
 			asins = ''
@@ -439,19 +438,13 @@ class ActionManagement:
 							continue
 						asin_arr.append(asin)
 			else:
+				self.end_flag += 1
+				self.cur_page = 0
 				return []
 			
 			if(len(self.before_asins) == 0):
 				self.before_asins = asin_arr
-			else:
-				compare_result = self.compare_asins(asin_arr, self.before_asins)
 
-				if(compare_result == True and len(self.temp_arr) == 0):
-					self.end_flag += 1
-					self.cur_page = 0
-					return []
-
-			print(asin_arr)
 			print(f"get asins => {len(asin_arr)}")
 			if(len(asin_arr) > 0):
 				asin_arr = self.array_append_and_depend(asin_arr)
